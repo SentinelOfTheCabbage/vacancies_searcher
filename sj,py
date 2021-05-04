@@ -16,23 +16,29 @@ def beautified_html(head):
     result = head
     
     # preparing!
-    result = sub('<span [ \&#a-zA-Z:;=\'"\"\-0-9,.]*>','<span>',result)
-    #result = re.sub('','',result)
-    #result = re.sub('','',result)
-    #result = re.sub('','',result)
-    #result = re.sub('','',result)
-    result = result.replace('<p>','')
+    result = sub('<span[ \&#a-zA-Z:;=\'"\"\-0-9,.]*>','',result)
+    result = sub('</span>','',result)
+    
+    result = sub('<p[ \&#a-zA-Z:;=\'"\"\-0-9,.]*>','',result)
+    result = sub('</p>','\n',result)
+    
+    result = sub('<ul[ \&#a-zA-Z:;=\'"\"\-0-9,.]*>','\n',result)
+    result = sub('</ul>','\n',result)
+    
+    result = sub('<li[ \&#a-zA-Z:;=\'"\"\-0-9,.]*>','-',result)
+    result = sub('</li>','\n',result)
+    
+    result = sub('<br />','<span>',result)
+    
+    result = sub('<strong[ \&#a-zA-Z:;=\'"\"\-0-9,.]*>','<',result)
+    result = sub('</strong>','>',result)
+    
+    result = sub('<em[ \&#a-zA-Z:;=\'"\"\-0-9,.]*>','',result)
+    result = sub('</em>','',result)
+
     result = result.replace('&nbsp;',' ')
-    result = result.replace('</p>','\n')
-    result = result.replace('<ul>','\n')
-    result = result.replace('</ul>','\n')
-    result = result.replace('<li>','-')
-    result = result.replace('</li>','\n')
-    result = result.replace('<br />','\n')
-    result = result.replace('<span>','')
-    result = result.replace('</span>','')
-    result = result.replace('<strong>','<')
-    result = result.replace('</strong>','>')
+    # result = result.replace('<>','<')
+    # result = result.replace('</strong>','>')
     return result
 
 # Temporary cicle to get info abot limit vacancies per page
@@ -76,7 +82,7 @@ while True:
                         f"\n==VACANCY ID = {job['id']}==", 
                         end='\n-----------------\n', 
                     )
-                    sleep(30) 
+                    input('[Next') 
     else:
         print(
             '\n~~~~\n'
