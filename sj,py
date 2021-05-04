@@ -1,0 +1,87 @@
+# from telebot import TeleBo
+import os
+from time import sleep
+from requests import get
+from re import sub
+from json import loads as load_string
+TOKEN = ''
+
+# bot = TeleBot(TOKEN)
+url_pattern = 'https://my.sbertalents.ru/job-requisition/v3?postingCategoory=777&region=1466&keywords=Python&page={}&size={}'
+size = 0
+all_jobs = set()
+
+# first define function that will beautify input HTML content of vacancies =)
+def beautified_html(head):
+    result = head
+    
+    # preparing!
+    result = sub('<span [ \&#a-zA-Z:;=\'"\"\-0-9,.]*>','<span>',result)
+    #result = re.sub('','',result)
+    #result = re.sub('','',result)
+    #result = re.sub('','',result)
+    #result = re.sub('','',result)
+    result = result.replace('<p>','')
+    result = result.replace('&nbsp;',' ')
+    result = result.replace('</p>','\n')
+    result = result.replace('<ul>','\n')
+    result = result.replace('</ul>','\n')
+    result = result.replace('<li>','-')
+    result = result.replace('</li>','\n')
+    result = result.replace('<br />','\n')
+    result = result.replace('<span>','')
+    result = result.replace('</span>','')
+    result = result.replace('<strong>','<')
+    result = result.replace('</strong>','>')
+    return result
+
+# Temporary cicle to get info abot limit vacancies per page
+while False:
+    size += 10
+    current_url = url_pattern.format('1',str(size))
+    content_len = len(load_string(get(current_url).text)['content'])
+    if content_len == size:
+        continue
+    else:
+        # print(content_len)
+        # print(current_url)
+        break
+    # all_jobs = []
+    # query = get(url_pattern.format('0'))
+    #pages_count = json.loads(query.text)['totalPages']
+    
+# K is there just to control count of output messages per run
+k = 0
+
+os.system('clear')
+
+while True:
+# while False:
+    k +=1
+    query = get(url_pattern.format('1','100'))
+    pages_count = load_string(query.text)['totalPages']
+    status = query.status_code
+    if status == 200:
+        for i in range(pages_count):
+            current_url  = url_pattern.format(str(i+1), str(100*(i+1)))
+            query = get(current_url)
+            content = load_string(query.text)['content']
+            for job in content:
+                k += 1
+                if job['id'] not in all_jobs:
+                    all_jobs.update([job['id']])
+                    print(
+                        f"\t! {job['content']['title']} !\n",
+                        beautified_html(job['content']['header']),
+                        f"\n==VACANCY ID = {job['id']}==", 
+                        end='\n-----------------\n', 
+                    )
+                    sleep(30) 
+    else:
+        print(
+            '\n~~~~\n'
+            'Bad news =('
+            'Can\'t get content =('
+            '\n~~~~\n'
+        )
+    sleep(60*10)
