@@ -72,15 +72,14 @@ def get_beautified_html(head):
 
 def get_current_vacancies():
     current_vacancies = list()
-    query = get(url_pattern.format('1','100'))
+    query = get(url_pattern.format('0','100'))
     status = query.status_code
     if status == 200:
-        pages_count = load_string(query.text)['totalPages']
-        print(f'Try to load {pages_count} pages')
-        for i in range(1, pages_count + 1):
-            query = get(url_pattern.format(str(i), str(100)))
-            content = load_string(query.text)['content']
-            current_vacancies += content
+        vacancies_count = load_string(query.text)['totalElements']
+        print(f'Try to load {vacancies_count} elements')
+        query = get(url_pattern.format('0', str(vacancies_count)))
+        content = load_string(query.text)['content']
+        current_vacancies += content
 
     return current_vacancies
 
@@ -99,7 +98,6 @@ def main():
         print(f'{pos+1}/{len(current_vacancies)}')
         if 'header' in job['content']:
             print(
-                job['content']['header'],
                 f"\t! {job['content']['title']} !\n",
                 get_beautified_html(job['content']['header']),
                 f"\n==VACANCY ID = {job['id']}==",
@@ -118,6 +116,8 @@ def main():
             if user_answer.lower() == 'l':
                 lovely_vacancies.append(job['id'])
             checked_vacancies.append(job['id'])
+            
+            #TODO - make any action on P (previous) button pressed =|
 
     with open('id_list.json', 'w') as file:
         dump(checked_vacancies, file)
@@ -126,3 +126,4 @@ def main():
         dump(lovely_vacancies, file)
 
 main()
+# print(get(url_pattern.format('0','1')).text)
